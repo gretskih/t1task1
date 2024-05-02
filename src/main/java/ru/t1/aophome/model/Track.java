@@ -3,19 +3,19 @@ package ru.t1.aophome.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "url")
-@Table(indexes = @Index(columnList = "code"))
+@Entity(name = "track")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Url {
+public class Track {
     @Id
     @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String url;
-    private String code;
+    @Column(name = "name_method")
+    private String nameMethod;
+    @Column(name = "execution_time")
+    private Long executionTime;
 }

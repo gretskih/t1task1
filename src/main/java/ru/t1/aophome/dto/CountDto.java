@@ -6,12 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Schema(description = "Сущность ссылка - код")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class RespDto {
-    private String url;
-    private String code;
+@Schema(description = "Сущность числа вызовов")
+public class CountDto {
+    private String nameMethod;
+    private Long countExecution;
 }

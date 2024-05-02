@@ -6,12 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Schema(description = "Сущность ссылка - код")
+@Schema(description = "Сущность имя метода - время выполнения метода")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class RespDto {
-    private String url;
-    private String code;
+public class TrackDto {
+    private String nameMethod;
+    private Long executionTime;
 }

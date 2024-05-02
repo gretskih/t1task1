@@ -6,12 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Schema(description = "Сущность ссылка - код")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class RespDto {
-    private String url;
-    private String code;
+@Schema(description = "Сущность среднего времени")
+public class AvgDto {
+    private String nameMethod;
+    private Double avgExecutionTime;
 }

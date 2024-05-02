@@ -6,12 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Schema(description = "Сущность ссылка - код")
+@Schema(description = "Сущность суммарного времени")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class RespDto {
-    private String url;
-    private String code;
+public class SumDto {
+    private String nameMethod;
+    private Long sumExecutionTime;
 }
