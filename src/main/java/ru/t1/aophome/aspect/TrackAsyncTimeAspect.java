@@ -36,8 +36,7 @@ public class TrackAsyncTimeAspect {
             log.error("Ошибка при выполнении метода {}", methodName, e);
             throw e;
         } finally {
-            long endTime = System.currentTimeMillis();
-            long runTime = endTime - startTime;
+            long runTime = System.currentTimeMillis() - startTime;
             CompletableFuture.runAsync(() -> {
                 service.save(new Track(null, methodName, runTime));
             });

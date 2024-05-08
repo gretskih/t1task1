@@ -6,12 +6,15 @@ import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
 import ru.t1.aophome.dto.AvgDto;
 import ru.t1.aophome.dto.TrackDto;
+import ru.t1.aophome.exception.ServiceException;
 import ru.t1.aophome.model.Track;
 import ru.t1.aophome.repository.TrackTimeRepository;
 
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
+
+import static ru.t1.aophome.service.UrlService.ERROR_DB;
 
 @Service
 @AllArgsConstructor
@@ -22,27 +25,45 @@ public class TrackService {
     public void save(Track track) {
         repository.save(track);
     }
-
     /**
      * Список записей по имени метода
      *
      * @param name
      * @return
      */
-    public Optional<List<TrackDto>> findTrackByMethodName(String name) {
-        var listTrack = repository.findTrackByNameMethod(name);
+    public List<TrackDto> findTrackByMethodName(String name) throws ServiceException {
+        List<Track> listTrack;
+        try {
+            listTrack = repository.findTrackByNameMethod(name);
+        } catch (Exception e) {
+            throw new ServiceException(ERROR_DB, e);
+        }
+        if(listTrack.isEmpty()) {
+            throw new ServiceException("Not Found", new IllegalArgumentException("Записи в базе данных для метода: " + name + " не найдены"));
+        }
         Type listType = new TypeToken<List<TrackDto>>() { }.getType();
-        return Optional.of(modelMapper.map(listTrack, listType));
+        return modelMapper.map(listTrack, listType);
     }
 
+
     /**
-     * Среднее время выподлнения метода
+     * Среднее время выполнения метода
      *
      * @param name
      * @return
      */
-    public Optional<AvgDto> getAvgTimeMethod(String name) {
-        return Optional.of(new AvgDto(name, repository.findAvgExecutionTimeMethod(name)));
+    public AvgDto getAvgTimeMethod(String name) throws ServiceException {
+        Optional<Double> result;
+        try {
+            result = repository.findAvgExecutionTimeMethod(name);
+        } catch (Exception e) {
+            throw new ServiceException(ERROR_DB, e);
+        }
+        if(result.isEmpty()) {
+            throw new ServiceException("Not Found",
+                    new IllegalArgumentException("Записи в базе данных для метода: " + name + " не найдены"));
+        }
+        return new AvgDto(name, result.get());
     }
 
     /**
@@ -51,8 +72,18 @@ public class TrackService {
      * @param likeName
      * @return
      */
-    public Optional<AvgDto> getAvgTimeGroupMethod(String likeName) {
-        return Optional.of(new AvgDto(likeName + "*", repository.findAvgExecutionTimeGroupMethod(likeName)));
+    public AvgDto getAvgTimeGroupMethod(String likeName) throws ServiceException {
+        Optional<Double> result;
+        try {
+            result = repository.findAvgExecutionTimeGroupMethod(likeName);
+        } catch (Exception e) {
+            throw new ServiceException(ERROR_DB, e);
+        }
+        if(result.isEmpty()) {
+            throw new ServiceException("Not Found",
+                    new IllegalArgumentException("Записи в базе данных для метода: " + likeName + " не найдены"));
+        }
+        return new AvgDto(likeName, result.get());
     }
 
     /**
@@ -61,8 +92,18 @@ public class TrackService {
      * @param name
      * @return
      */
-    public Optional<Long> getSumTimeMethod(String name) {
-        return Optional.ofNullable(repository.findSumOfExecutionTimeMethod(name));
+    public Long getSumTimeMethod(String name) throws ServiceException {
+        Optional<Long> result;
+        try {
+            result = repository.findSumOfExecutionTimeMethod(name);
+        } catch (Exception e) {
+            throw new ServiceException(ERROR_DB, e);
+        }
+        if(result.isEmpty()) {
+            throw new ServiceException("Not Found",
+                    new IllegalArgumentException("Записи в базе данных для метода: " + name + " не найдены"));
+        }
+        return result.get();
     }
 
     /**
@@ -71,7 +112,17 @@ public class TrackService {
      * @param name
      * @return
      */
-    public Optional<Long> getCountExecutionMethod(String name) {
-        return Optional.ofNullable(repository.findCountOfExecutionTimeMethod(name));
+    public Long getCountExecutionMethod(String name) throws ServiceException {
+        Long result;
+        try {
+            result = repository.findCountOfExecutionTimeMethod(name);
+        } catch (Exception e) {
+            throw new ServiceException(ERROR_DB, e);
+        }
+        if(result == 0) {
+            throw new ServiceException("Not Found",
+                    new IllegalArgumentException("Записи в базе данных для метода: " + name + " не найдены"));
+        }
+        return result;
     }
 }

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.t1.aophome.dto.*;
+import ru.t1.aophome.exception.ControllerException;
+import ru.t1.aophome.exception.ServiceException;
 import ru.t1.aophome.service.TrackService;
 
 import java.util.List;
@@ -29,13 +31,15 @@ public class TrackTimeController {
             description = "Список вызовов метода со временем выполнения в мс"
     )
     @PostMapping("/method")
-    public ResponseEntity<List<TrackDto>> findTimeByNameMethod(@RequestBody MethodNameDto method) {
-        return service.findTrackByMethodName(method.name())
-                .map(t -> ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(t))
-                .orElseGet(ResponseEntity
-                        .status(HttpStatus.NO_CONTENT)::build);
+    public ResponseEntity<List<TrackDto>> findTimeByNameMethod(@RequestBody MethodNameDto method) throws ControllerException {
+        try {
+            var result = service.findTrackByMethodName(method.name());
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(result);
+        } catch (ServiceException e) {
+            throw new ControllerException(e.getMessage(), e);
+        }
     }
 
     @Operation(
@@ -43,13 +47,15 @@ public class TrackTimeController {
             description = "Среднее время выполнения метода в мс"
     )
     @PostMapping("/avg")
-    public ResponseEntity<AvgDto> avgTimeMethod(@RequestBody MethodNameDto method) {
-        return service.getAvgTimeMethod(method.name())
-                .map(t -> ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(t))
-                .orElseGet(ResponseEntity
-                        .status(HttpStatus.NO_CONTENT)::build);
+    public ResponseEntity<AvgDto> avgTimeMethod(@RequestBody MethodNameDto method) throws ControllerException {
+        try {
+            var result = service.getAvgTimeMethod(method.name());
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(result);
+        } catch (ServiceException e) {
+            throw new ControllerException(e.getMessage(), e);
+        }
     }
 
     @Operation(
@@ -57,13 +63,15 @@ public class TrackTimeController {
             description = "Среднее время выполнения группы метода в мс"
     )
     @PostMapping("/avg/group")
-    public ResponseEntity<AvgDto> avgTimeGroupMethod(@RequestBody MethodNameDto likeMethod) {
-        return service.getAvgTimeGroupMethod(likeMethod.name())
-                .map(t -> ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(t))
-                .orElseGet(ResponseEntity
-                        .status(HttpStatus.NO_CONTENT)::build);
+    public ResponseEntity<AvgDto> avgTimeGroupMethod(@RequestBody MethodNameDto likeMethod) throws ControllerException {
+        try {
+            var result = service.getAvgTimeGroupMethod(likeMethod.name());
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(result);
+        } catch (ServiceException e) {
+            throw new ControllerException(e.getMessage(), e);
+        }
     }
 
     @Operation(
@@ -71,13 +79,15 @@ public class TrackTimeController {
             description = "Суммарное время выполнения метода в мс"
     )
     @PostMapping("/sum")
-    public ResponseEntity<SumDto> sumTimeMethod(@RequestBody MethodNameDto method) {
-        return service.getSumTimeMethod(method.name())
-                .map(t -> ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(new SumDto(method.name(), t)))
-                .orElseGet(ResponseEntity
-                        .status(HttpStatus.NO_CONTENT)::build);
+    public ResponseEntity<SumDto> sumTimeMethod(@RequestBody MethodNameDto method) throws ControllerException {
+        try {
+            var result = service.getSumTimeMethod(method.name());
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new SumDto(method.name(), result));
+        } catch (ServiceException e) {
+            throw new ControllerException(e.getMessage(), e);
+        }
     }
 
     @Operation(
@@ -85,12 +95,14 @@ public class TrackTimeController {
             description = "Число вызовов метода"
     )
     @PostMapping("/count")
-    public ResponseEntity<CountDto> countExecutingMethod(@RequestBody MethodNameDto method) {
-        return service.getCountExecutionMethod(method.name())
-                .map(t -> ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(new CountDto(method.name(), t)))
-                .orElseGet(ResponseEntity
-                        .status(HttpStatus.NO_CONTENT)::build);
+    public ResponseEntity<CountDto> countExecutingMethod(@RequestBody MethodNameDto method) throws ControllerException {
+        try {
+            var result = service.getCountExecutionMethod(method.name());
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new CountDto(method.name(), result));
+        } catch (ServiceException e) {
+            throw new ControllerException(e.getMessage(), e);
+        }
     }
 }

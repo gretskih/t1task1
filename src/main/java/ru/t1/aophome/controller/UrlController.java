@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.t1.aophome.dto.RegUrlDto;
 import ru.t1.aophome.dto.RespDto;
+import ru.t1.aophome.exception.ControllerException;
+import ru.t1.aophome.exception.ServiceException;
 import ru.t1.aophome.service.UrlService;
 
 import java.util.List;
@@ -31,13 +33,21 @@ public class UrlController {
             description = "Позволяет зарегистрировать ссылку и получить ассоциированный код"
     )
     @PostMapping("/code")
-    public ResponseEntity<RespDto> code(@RequestBody RegUrlDto regDto) throws ExecutionException, InterruptedException {
-        return executorService.submit(() -> service.addUrl(regDto)).get()
-                .map(c -> ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(c))
-                .orElseGet(ResponseEntity
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)::build);
+    public ResponseEntity<RespDto> code(@RequestBody RegUrlDto regDto) throws ControllerException {
+        try {
+            return executorService.submit(() -> service.addUrl(regDto)).get()
+                    .map(c -> ResponseEntity
+                            .status(HttpStatus.OK)
+                            .body(c))
+                    .orElseGet(ResponseEntity
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR)::build);
+        } catch (ExecutionException e) {
+            throw new ControllerException("Внутренняя ошибка", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ControllerException("Выполнение прервано", e);
+        }
+
     }
 
     @Operation(
@@ -45,13 +55,15 @@ public class UrlController {
             description = "Позволяет по ассоциированному коду получить ссылку."
     )
     @GetMapping("/{code}")
-    public ResponseEntity<RespDto> url(@PathVariable String code) {
-        return service.getUrlByCode(code)
-                .map(u -> ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(u))
-                .orElseGet(ResponseEntity
-                        .status(HttpStatus.NO_CONTENT)::build);
+    public ResponseEntity<RespDto> url(@PathVariable String code) throws ControllerException {
+        try {
+            var result = service.getUrlByCode(code);
+            return ResponseEntity
+                            .status(HttpStatus.OK)
+                            .body(result);
+        } catch (ServiceException e) {
+            throw new ControllerException(e.getMessage(), e);
+        }
     }
 
     @Operation(
@@ -59,10 +71,14 @@ public class UrlController {
             description = "Получение всего списка код-ссылка."
     )
     @GetMapping("/all")
-    public ResponseEntity<List<RespDto>> all() {
-        var listAll = service.getAll();
-        if(!listAll.isEmpty()) {
-            return new ResponseEntity<>(listAll, HttpStatus.OK);
+    public ResponseEntity<List<RespDto>> all() throws ControllerException {
+        try {
+            var listAll = service.getAll();
+            if(!listAll.isEmpty()) {
+                return new ResponseEntity<>(listAll, HttpStatus.OK);
+            }
+        } catch (ServiceException e) {
+            throw new ControllerException(e.getMessage(), e);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -72,9 +88,13 @@ public class UrlController {
             description = "Удаление ссылки по ассоциированному коду из сервиса."
     )
     @DeleteMapping("/delete/{code}")
-    public ResponseEntity<?> delete(@PathVariable String code) {
-        if(service.deleteByCode(code)) {
-            return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<?> delete(@PathVariable String code) throws ControllerException {
+        try {
+            if(service.deleteByCode(code)) {
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+        } catch (ServiceException e) {
+            throw new ControllerException(e.getMessage(), e);
         }
         return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
     }
@@ -85,7 +105,7 @@ public class UrlController {
     )
     @DeleteMapping("/delete/all")
     public ResponseEntity<?> deleteAll() {
-        service.deleteAll();
+        executorService.submit(service::deleteAll);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

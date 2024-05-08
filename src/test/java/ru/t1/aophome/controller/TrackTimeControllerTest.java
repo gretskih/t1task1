@@ -73,7 +73,7 @@ public class TrackTimeControllerTest {
          */
         this.mockMvc.perform(get("/url/SIuNTmvk3A"))
                 //.andDo(print())
-                .andExpect(status().is2xxSuccessful());
+                .andExpect(status().is4xxClientError());
 
         /**
          * Выполнение метода deleteByCode()
